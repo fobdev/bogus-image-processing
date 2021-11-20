@@ -53,7 +53,7 @@ const generateImage = async (topText: string, bottomText: string, imageURL: stri
 
         const image = await generateImage(topText, bottomText, `https:${url}`);
 
-        res.send({ image });
+        res.end(image);
     });
 
     app.listen(port, () => {
