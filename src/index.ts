@@ -1,57 +1,26 @@
-import Canvas, { createCanvas } from "canvas";
+import { MemeGenerator } from "./commands";
 import express from "express";
-
-const generateImage = async (topText: string, bottomText: string, imageURL: string) => {
-    const image = await Canvas.loadImage(imageURL);
-    const width = image.width;
-    const height = image.height;
-
-    const canvas = createCanvas(width, height);
-    const ctx = canvas.getContext("2d");
-
-    ctx.drawImage(image, 0, 0, width, height);
-
-    Canvas.registerFont("./src/fonts/Impact.ttf", { family: "Sans-Serif" });
-    Canvas.registerFont("./src/fonts/NotoSansJP-Bold.otf", { family: "Sans-Serif" });
-
-    const japanese: RegExp =
-        /[\u3000-\u303f\u3040-\u309f\u30a0-\u30ff\uff00-\uff9f\u4e00-\u9faf\u3400-\u4dbf]/;
-
-    ctx.font = `bold ${width! / 10}px ${
-        topText.match(japanese) || bottomText.match(japanese) ? "NotoSansJP-Bold" : "Impact"
-    }`;
-    ctx.textAlign = "center";
-
-    // Top Text
-    ctx.textBaseline = "top";
-    ctx.fillStyle = "white";
-    ctx.fillText(topText, width! / 2, 0, width);
-    ctx.fillStyle = "black";
-    ctx.strokeText(topText, width! / 2, 0, width);
-
-    // Bottom Text
-    ctx.textBaseline = "bottom";
-    ctx.fillStyle = "white";
-    ctx.fillText(bottomText, width! / 2, height!, width);
-    ctx.fillStyle = "black";
-    ctx.strokeText(bottomText, width! / 2, height!, width);
-
-    return canvas.toBuffer();
-};
+import { Couple } from "./commands/Couple";
 
 (async () => {
     const app = express();
     const port = process.env.PORT || 1337;
 
-    app.get("/:topText/:bottomText/:imageURL*", async (req, res) => {
-        const { params } = req;
-        const bottomText = params.bottomText;
-        const topText = params.topText;
+    app.get("/meme/", async (req, res) => {
+        const { query } = req;
+        const bottomText = query.bottom;
+        const topText = query.top;
+        const url = query.url;
 
-        // @ts-ignore
-        const url = params?.[0];
+        const image = await MemeGenerator(topText, bottomText, url);
 
-        const image = await generateImage(topText, bottomText, `https:${url}`);
+        res.end(image);
+    });
+
+    app.get("/couple/", async (req, res) => {
+        const { query } = req;
+
+        const image = await Couple(query.u1, query.u2);
 
         res.end(image);
     });
