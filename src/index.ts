@@ -1,6 +1,5 @@
-import { MemeGenerator } from "./commands";
+import { Couple, MemeGenerator } from "./commands";
 import express from "express";
-import { Couple } from "./commands/Couple";
 
 (async () => {
     const app = express();
